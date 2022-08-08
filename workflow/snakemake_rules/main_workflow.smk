@@ -311,7 +311,7 @@ rule subsample:
     conda: config["conda_environment"]
     shell:
         """
-        augur filter \
+        augur filter --engine sqlite \
             --metadata {input.metadata} \
             --include {input.include} \
             --exclude {input.exclude} \
@@ -348,7 +348,7 @@ rule extract_subsampled_sequences:
     conda: config["conda_environment"]
     shell:
         """
-        augur filter \
+        augur filter --engine sqlite \
             --metadata {input.metadata} \
             --sequences {input.alignment} \
             --sequence-index {input.sequence_index} \
@@ -441,7 +441,7 @@ rule combine_samples:
     conda: config["conda_environment"]
     shell:
         """
-        augur filter \
+        augur filter --engine sqlite \
             --sequences {input.sequences} \
             --metadata {input.metadata} \
             --exclude-all \
@@ -689,7 +689,7 @@ rule filter:
     conda: config["conda_environment"]
     shell:
         """
-        augur filter \
+        augur filter --engine sqlite \
             --sequences {input.sequences} \
             --metadata {input.metadata} \
             --include {input.include} \

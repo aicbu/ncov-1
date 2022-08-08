@@ -90,7 +90,7 @@ def _get_filter_min_length_query(wildcards):
             # as recommended by pandas:
             #
             # https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html
-            query_parts.append(f"(`{input_name}` == 'yes' & _length >= {min_length})")
+            query_parts.append(f"(`{input_name}` = 'yes' AND _length >= {min_length})")
         else:
             query_parts.append(f"(_length >= {min_length})")
 
