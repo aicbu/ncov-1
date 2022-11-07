@@ -120,6 +120,10 @@ task gisaid_ingest {
     zstd -T0 gisaid_nextclade.tsv
 
     ls -lh gisaid_nextclade.tsv.zst gisaid_sequences.fasta.zst gisaid_metadata.tsv.zst
+
+    # Capture snakemake logs
+    mv ${INDIR}/.snakemake snakemake_logs
+    zip -r snakemake_logs.zip snakemake_logs
   >>>
 
   output {
@@ -130,6 +134,9 @@ task gisaid_ingest {
     # cache for next run
     File nextclade_tsv = "gisaid_nextclade.tsv.zst"
     String last_run = read_string("LAST_RUN")
+
+    # debug files
+    File snakemake_logs = "snakemake_logs.zip"
   }
 
   runtime {
@@ -249,6 +256,10 @@ task genbank_ingest {
     zstd -T0 genbank_nextclade.tsv
 
     ls -lh genbank_nextclade.tsv.zst genbank_sequences.fasta.zst genbank_metadata.tsv.zst
+
+    # Capture snakemake logs
+    mv ${INDIR}/.snakemake snakemake_logs
+    zip -r snakemake_logs.zip snakemake_logs
   >>>
 
   output {
@@ -259,6 +270,9 @@ task genbank_ingest {
     # cache for next run
     File nextclade_tsv = "genbank_nextclade.tsv.zst"
     String last_run = read_string("LAST_RUN")
+
+    # debug files
+    File snakemake_logs = "snakemake_logs.zip"
   }
 
   runtime {

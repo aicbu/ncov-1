@@ -38,5 +38,7 @@ workflow GISAID_INGEST {
 
     File nextclade_tsv = ingest.nextclade_tsv
     String last_run = ingest.last_run
+
+    File snakemake_logs = ingest.snakemake_logs
   }
 }
