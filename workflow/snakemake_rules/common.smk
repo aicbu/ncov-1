@@ -223,6 +223,13 @@ def _get_upload_inputs(wildcards):
 
     origin = config["S3_DST_ORIGINS"][0]
 
+    # the 100k sample is unique in that we only want to upload 2 files. Note that the S3_DST_ORIGINS will specify the directory
+    if len(config["builds"].keys())==1 and "100k" in config["builds"]:
+        return {
+            f"metadata.tsv.xz": "results/100k/100k_subsampled_metadata.tsv.xz",
+            f"sequences.fasta.xz": "results/100k/100k_subsampled_sequences.fasta.xz"
+        }
+
     # This function bakes in these assumptions here about the build names used
     # for the nextstrain.org/ncov/gisaid and …/open builds and then
     # special-cases them below.
