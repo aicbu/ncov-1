@@ -17,6 +17,11 @@ builds:
   100k:
     subsampling_scheme: 100k_scheme
 
+# mapping of remote: local files to be uploaded under S3_DST_BUCKET
+upload:
+  metadata.tsv.xz: results/100k/100k_subsampled_metadata.tsv.xz
+  sequences.fasta.xz: results/100k/100k_subsampled_sequences.fasta.xz
+
 # remove sequences without division label in US
 filter:
   exclude_where: "division='USA'"

@@ -208,6 +208,19 @@ def _get_max_date_for_frequencies(wildcards):
         )
 
 def _get_upload_inputs(wildcards):
+    # Do whatever the configuration says if it has opinions.
+    if "upload" in config:
+        return config["upload"]
+
+    # Otherwise, assume we're running under the nextstrain-gisaid or
+    # nextstrain-open profile.
+    #
+    # XXX TODO: We could replace the dynamic upload mapping generated below
+    # with a static mapping defined in each profile's config by expand()-ing
+    # (or str.format()-ing) {build_name} and {auspice_json_prefix} in the
+    # static keys and values.  Leaving this as a future improvement for now.
+    #   -trs, 1 Dec 2022
+
     # The main workflow supports multiple inputs/origins, but our desired file
     # structure under data.nextstrain.org/files/ncov/open/… is designed around
     # a single input/origin.  Intermediates (aligned, etc)
@@ -222,13 +235,6 @@ def _get_upload_inputs(wildcards):
         raise Exception(f'The "upload" rule requires a single value in S3_DST_ORIGINS (got {config["S3_DST_ORIGINS"]!r}).')
 
     origin = config["S3_DST_ORIGINS"][0]
-
-    # the 100k sample is unique in that we only want to upload 2 files. Note that the S3_DST_ORIGINS will specify the directory
-    if len(config["builds"].keys())==1 and "100k" in config["builds"]:
-        return {
-            f"metadata.tsv.xz": "results/100k/100k_subsampled_metadata.tsv.xz",
-            f"sequences.fasta.xz": "results/100k/100k_subsampled_sequences.fasta.xz"
-        }
 
     # This function bakes in these assumptions here about the build names used
     # for the nextstrain.org/ncov/gisaid and …/open builds and then
