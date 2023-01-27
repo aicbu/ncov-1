@@ -4,13 +4,13 @@ task nextstrain_build {
   input {
     File? sequence_fasta
     File? metadata_tsv
-    File? context_targz  #<= optional contextual sequence
+    File? context_targz               # optional contextual sequence
     String build_name = "example"
 
-    File? configfile_yaml # e.g. builds.yaml
-    File? custom_zip      # <= since custom is private
+    File? configfile_yaml             # example: "builds.yaml"
+    File? custom_zip                  # Zipped build configuration folder
     # String? custom_url = "path to public github"  # Our custom config files are private
-    String? active_builds # Wisconsin,Minnesota,Washington
+    String? active_builds # example: "Wisconsin,Minnesota,Washington"
 
     String? remote_url      # example: "nextstrain.org/groups/example/ncov"
     String? NEXTSTRAIN_USERNAME
@@ -22,19 +22,20 @@ task nextstrain_build {
     Float memory = 3.5
   }
   command <<<
-    # Pull ncov, zika or similar pathogen repo
+    # (1) Pull ncov GitHub Repository
     wget -O master.zip ~{pathogen_giturl}
     INDIR=`unzip -Z1 master.zip | head -n1 | sed 's:/::g'`
     unzip master.zip
 
-    # If a config file (builds.yaml) file is not provided, generate one
-    export CONFIGFILE_FLAG=""
+    # (2) Check that any input sequences fasta files also have a metadata file
     if [[ -n "~{sequence_fasta}" ]]; then
-      if [ -z "~{metadata_tsv}" ]; then
+      if [[ -z "~{metadata_tsv}" ]]; then
         echo "Error: Provided sequence: ~{sequence_fasta} but missing metadata tsv file."
         exit 1
       fi
 
+      # (3) If a config file (builds.yaml) file is not provided, generate one
+      # website: https://docs.nextstrain.org/projects/ncov/en/latest/tutorial/custom-data.html#break-down-the-command
       if [[ -z "~{configfile_yaml}" ]]; then
     cat << EOF > builds.yaml
     inputs:
@@ -64,24 +65,26 @@ task nextstrain_build {
         echo "=====builds.yaml====="
         cat builds.yaml
         mv builds.yaml $INDIR/.
+
+        wget https://raw.githubusercontent.com/nextstrain/ncov-tutorial/main/auspice-config-custom-data.json
+        cat auspice-config-custom-data.json | sed 's/custom_data/~{build_name}/g' > ${INDIR}/auspice-config-custom-data.json
+  
+        echo "=====auspice-config-custom-data.json====="
+        cat ${INDIR}/auspice-config-custom-data.json
       fi
 
-      wget https://raw.githubusercontent.com/nextstrain/ncov-tutorial/main/auspice-config-custom-data.json
-      cat auspice-config-custom-data.json | sed 's/custom_data/~{build_name}/g' > ${INDIR}/auspice-config-custom-data.json
-
-      echo "=====auspice-config-custom-data.json====="
-      cat ${INDIR}/auspice-config-custom-data.json
-    fi
-
+      # (4) Copy sequences and metadata file into data folder
       cp ~{sequence_fasta} $INDIR/data/.
       cp ~{metadata_tsv} $INDIR/data/.
+    fi
+
     if [[ -n "~{configfile_yaml}" ]]; then
       export CONFIGFILE_FLAG="--configfile ~{configfile_yaml}"
     fi
 
     echo "CONFIGFILE_FLAG: " ${CONFIGFILE_FLAG}
 
-    # If a tar gz of contextual sequences are provided such as GISAID Regional datasets, move it to the ncov folder
+    # If a tar gz of contextual sequences are provided such as GISAID Regional datasets, move it to the ncov/data folder
     if [[ -n "~{context_targz}" ]] ; then
       cp ~{context_targz} $INDIR/data/.
     fi
