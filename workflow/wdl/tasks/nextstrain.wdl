@@ -102,12 +102,9 @@ task nextstrain_build {
       # cp $BUILDYAML $INDIR/build_custom.yaml
     fi
 
-    # Max out the number of threads
-    PROC=`nproc`
-
     # Run nextstrain
     nextstrain build \
-      --cpus $PROC \
+      --cpus `nproc` \
       --memory  ~{memory}Gib \
       --native $INDIR $CONFIGFILE_FLAG \
       ~{"--config active_builds=" + active_builds}
