@@ -12,9 +12,9 @@ task nextstrain_build {
     # String? custom_url = "path to public github"  # Our custom config files are private
     String? active_builds # Wisconsin,Minnesota,Washington
 
-    String? s3deploy      # "s3://nextstrain-staging/"
-    String? AWS_ACCESS_KEY_ID
-    String? AWS_SECRET_ACCESS_KEY
+    String? remote_url      # example: "nextstrain.org/groups/example/ncov"
+    String? NEXTSTRAIN_USERNAME
+    String? NEXTSTRAIN_PASSWORD
 
     String pathogen_giturl = "https://github.com/nextstrain/ncov/archive/refs/heads/master.zip"
     Int cpu = 8
@@ -109,14 +109,13 @@ task nextstrain_build {
       --native $INDIR $CONFIGFILE_FLAG \
       ~{"--config active_builds=" + active_builds}
 
+    # Deploy to Nextstrain Groups
+    # website: https://docs.nextstrain.org/projects/cli/en/latest/commands/remote/upload/#
     if [[ -n "~{s3deploy}" ]] ; then
-      # may be replaced with Nextstrain.org login instead, check docs
-      # https://docs.nextstrain.org/projects/cli/en/latest/commands/remote/upload/#
-      export AWS_ACCESS_KEY_ID=~{AWS_ACCESS_KEY_ID}
-      export AWS_SECRET_ACCESS_KEY=~{AWS_SECRET_ACCESS_KEY}
-
-      # deploy to Nextstrain Groups, todo: rename s3deploy
-      nextstrain remote upload ~{s3deploy} $INDIR/auspice/*.json
+      export NEXTSTRAIN_USERNAME=~{NEXTSTRAIN_USERNAME}
+      export NEXTSTRAIN_PASSWORD=~{NEXTSTRAIN_PASSWORD}
+      nextstrain login --no-prompt
+      nextstrain remote upload ~{remote_url} $INDIR/auspice/*.json
     fi
 
     # Prepare output
