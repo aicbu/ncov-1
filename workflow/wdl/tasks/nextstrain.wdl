@@ -39,8 +39,8 @@ task nextstrain_build {
     cat << EOF > builds.yaml
     inputs:
     - name: "~{build_name}"
-      metadata: ~{metadata_tsv}
-      sequences: ~{sequence_fasta}
+      metadata: data/~{metadata_tsv}
+      sequences: data/~{sequence_fasta}
     - name: opengenbank
       metadata: https://data.nextstrain.org/files/ncov/open/reference/metadata.tsv.xz
       sequences: https://data.nextstrain.org/files/ncov/open/reference/sequences.fasta.xz
@@ -66,8 +66,6 @@ task nextstrain_build {
         mv builds.yaml $INDIR/.
       fi
 
-      cp ~{sequence_fasta} $INDIR/.
-      cp ~{metadata_tsv} $INDIR/.
       wget https://raw.githubusercontent.com/nextstrain/ncov-tutorial/main/auspice-config-custom-data.json
       cat auspice-config-custom-data.json | sed 's/custom_data/~{build_name}/g' > ${INDIR}/auspice-config-custom-data.json
 
@@ -75,6 +73,8 @@ task nextstrain_build {
       cat ${INDIR}/auspice-config-custom-data.json
     fi
 
+      cp ~{sequence_fasta} $INDIR/data/.
+      cp ~{metadata_tsv} $INDIR/data/.
     if [[ -n "~{configfile_yaml}" ]]; then
       export CONFIGFILE_FLAG="--configfile ~{configfile_yaml}"
     fi
@@ -83,7 +83,7 @@ task nextstrain_build {
 
     # If a tar gz of contextual sequences are provided such as GISAID Regional datasets, move it to the ncov folder
     if [[ -n "~{context_targz}" ]] ; then
-      cp ~{context_targz} $INDIR/.
+      cp ~{context_targz} $INDIR/data/.
     fi
 
     # If a custom zipped folder of configs are provided, move it to ncov
