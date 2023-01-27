@@ -6,53 +6,50 @@ workflow Nextstrain_WRKFLW {
   input {
     # ncov
     # Option 1: Pass in a sequence and metadata files, create a configfile_yaml
-    File? sequence_fasta
-    File? metadata_tsv
-    File? context_targz #<= optional contextual seqs in a tarball
-    String? build_name
+    File? A01_sequence_fasta
+    File? A02_metadata_tsv
+    File? A03_context_targz #<= optional contextual seqs in a tarball
+    String? A04_build_name
     
     # Option 2: Use a custom config file (e.g. builds.yaml) with https or s3 sequence or metadata files
-    File? configfile_yaml
-    File? custom_zip      # optional modifier: add a my_profiles.zip folder for my_auspice_config.json
-    String? active_builds # optional modifier: specify "Wisconsin,Minnesota,Iowa"
-    
-    # Option 3? GISAID augur zip?
-    # File? gisaid_zip # tarball
-    
+    File? A05_configfile_yaml
+    File? A06_custom_zip      # optional modifier: add a my_profiles.zip folder for my_auspice_config.json
+    String? A07_active_builds # optional modifier: specify "Wisconsin,Minnesota,Iowa"
+        
     # Optional Keys for deployment
-    String? s3deploy
-    String? AWS_ACCESS_KEY_ID
-    String? AWS_SECRET_ACCESS_KEY
+    String? A08_remote_url
+    String? A09_NEXTSTRAIN_USERNAME
+    String? A10_NEXTSTRAIN_PASSWORD
     
-    # By default, run the ncov workflow (can swap it for zika or something else)
-    String pathogen_giturl = "https://github.com/nextstrain/ncov/archive/refs/heads/master.zip"
-    Int? cpu
-    Int? memory       # in GiB
-    Int? disk_size
+    # Path to pipeline repository and runtime information
+    String RT_pathogen_giturl = "https://github.com/nextstrain/ncov/archive/refs/heads/master.zip"
+    Int? RT_cpu
+    Int? RT_memory       # in GiB
+    Int? RT_disk_size
   }
 
   call nextstrain.nextstrain_build as build {
     input:
       # Option 1
-      sequence_fasta = sequence_fasta,
-      metadata_tsv = metadata_tsv,
-      context_targz = context_targz,
-      build_name = build_name,
+      sequence_fasta = A01_sequence_fasta,
+      metadata_tsv = A02_metadata_tsv,
+      context_targz = A03_context_targz,
+      build_name = A04_build_name,
   
       # Option 2
-      configfile_yaml = configfile_yaml,
-      custom_zip = custom_zip,
-      active_builds = active_builds,
+      configfile_yaml = A05_configfile_yaml,
+      custom_zip = A06_custom_zip,
+      active_builds = A07_active_builds,
   
       # Optional deploy to s3 site
-      s3deploy = s3deploy,
-      AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID,
-      AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY,
+      remote_url = A08_remote_url,
+      NEXTSTRAIN_USERNAME = A09_NEXTSTRAIN_USERNAME,
+      NEXTSTRAIN_PASSWORD = A10_NEXTSTRAIN_PASSWORD,
   
-      pathogen_giturl = pathogen_giturl,
-      cpu = cpu,
-      memory = memory,
-      disk_size = disk_size
+      pathogen_giturl = RT_pathogen_giturl,
+      cpu = RT_cpu,
+      memory = RT_memory,
+      disk_size = RT_disk_size
   }
 
   output {
