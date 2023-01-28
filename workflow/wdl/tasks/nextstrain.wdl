@@ -111,7 +111,7 @@ task nextstrain_build {
 
     # Deploy to Nextstrain Groups
     # website: https://docs.nextstrain.org/projects/cli/en/latest/commands/remote/upload/#
-    if [[ -n "~{s3deploy}" ]] ; then
+    if [[ -n "~{remote_url}" ]] ; then
       export NEXTSTRAIN_USERNAME=~{NEXTSTRAIN_USERNAME}
       export NEXTSTRAIN_PASSWORD=~{NEXTSTRAIN_PASSWORD}
       nextstrain login --no-prompt
