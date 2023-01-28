@@ -2,7 +2,7 @@ version 1.0
 
 import "tasks/nextstrain.wdl" as nextstrain
 
-workflow Nextstrain_WRKFLW {
+workflow TERRA_NCOV {
   input {
     # ncov
     # Option 1: Pass in a sequence and metadata files, create a configfile_yaml
