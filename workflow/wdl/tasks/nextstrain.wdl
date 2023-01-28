@@ -74,8 +74,8 @@ task nextstrain_build {
       fi
 
       # (4) Copy sequences and metadata file into data folder
-      cp ~{sequence_fasta} $INDIR/data/.
-      cp ~{metadata_tsv} $INDIR/data/.
+      ln -s ~{sequence_fasta} $INDIR/data/.
+      ln -s ~{metadata_tsv} $INDIR/data/.
     fi
 
     if [[ -n "~{configfile_yaml}" ]]; then
@@ -86,7 +86,7 @@ task nextstrain_build {
 
     # If a tar gz of contextual sequences are provided such as GISAID Regional datasets, move it to the ncov/data folder
     if [[ -n "~{context_targz}" ]] ; then
-      cp ~{context_targz} $INDIR/data/.
+      ln -s ~{context_targz} $INDIR/data/.
     fi
 
     # If a custom zipped folder of configs are provided, move it to ncov
