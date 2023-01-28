@@ -96,10 +96,6 @@ task nextstrain_build {
       CUSTOM_DIR=`unzip -Z1 here_custom.zip | head -n1 | sed 's:/::g'`
       unzip here_custom.zip
       cp -r $CUSTOM_DIR $INDIR/.
-
-      # Draft: if passing config file from zip folder
-      # BUILDYAML=`ls -1 $CUSTOM_DIR/*.yaml | head -n1`
-      # cp $BUILDYAML $INDIR/build_custom.yaml
     fi
 
     # Run nextstrain
