@@ -40,8 +40,8 @@ task nextstrain_build {
     cat << EOF > builds.yaml
     inputs:
     - name: "~{build_name}"
-      metadata: data~{metadata_tsv}
-      sequences: data~{sequence_fasta}
+      metadata: data/~{basename(metadata_tsv)}
+      sequences: data/~{basename(sequence_fasta)}
     - name: opengenbank
       metadata: https://data.nextstrain.org/files/ncov/open/reference/metadata.tsv.xz
       sequences: https://data.nextstrain.org/files/ncov/open/reference/sequences.fasta.xz
