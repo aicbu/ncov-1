@@ -23,12 +23,6 @@ If you are not already there, change directory to the ``ncov`` directory:
 
       cd ncov
 
-and activate the ``nextstrain`` conda environment:
-
-   .. code:: text
-
-      conda activate nextstrain
-
 .. _custom-data-curate-data-from-gisaid:
 
 Curate data from GISAID
@@ -95,7 +89,7 @@ From within the ``ncov/`` directory, run the ``ncov`` workflow using a pre-writt
 
 .. code:: text
 
-   nextstrain build . --cores all --configfile ncov-tutorial/custom-data.yaml
+   nextstrain build . --configfile ncov-tutorial/custom-data.yaml
 
 Break down the command
 ~~~~~~~~~~~~~~~~~~~~~~

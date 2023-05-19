@@ -209,6 +209,8 @@ def get_database_ids_by_strain(metadata_file, metadata_id_columns, database_id_c
         header = True
 
         for metadata in metadata_reader:
+            metadata = sanitize_strain_names(metadata, args.strip_prefixes)
+
             # Check for database id columns.
             valid_database_id_columns = metadata.columns.intersection(
                 database_id_columns
@@ -256,6 +258,41 @@ def get_database_ids_by_strain(metadata_file, metadata_id_columns, database_id_c
         raise DuplicateException(f"{len(duplicate_strains)} strains have duplicate records. See '{duplicates_file}' for more details.")
 
     return mapping_path
+
+
+def sanitize_strain_names(metadata, prefixes_to_strip):
+    """Remove and replace certain characters in strain names.
+
+    Parameters
+    ----------
+    metadata : pandas.DataFrame
+        A data frame indexed by strain name.
+    prefixes_to_strip : list[str]
+        A list of prefixes to be stripped from the strain name.
+    """
+    # Reset the data frame index, to make the "strain" column available
+    # for transformation.
+    strain_field = metadata.index.name
+    metadata = metadata.reset_index()
+
+    # Strip prefixes from strain names.
+    if prefixes_to_strip:
+        metadata[strain_field] = metadata[strain_field].apply(
+            lambda strain: strip_prefixes(strain, prefixes_to_strip)
+        )
+
+    # Replace whitespaces from strain names with nothing to match Nextstrain's
+    # convention since whitespaces are not allowed in FASTA record names.
+    metadata[strain_field] = metadata[strain_field].str.replace(" ", "")
+
+    # Replace standard characters that are not accepted by all downstream
+    # tools as valid FASTA names.
+    metadata[strain_field] = metadata[strain_field].str.replace("'", "-")
+
+    # Set the index back to the strain column.
+    metadata = metadata.set_index(strain_field)
+
+    return metadata
 
 
 def filter_duplicates(metadata, database_ids_by_strain):
@@ -429,27 +466,26 @@ if __name__ == '__main__':
 
     with open_file(args.output, "w") as output_file_handle:
         for metadata in metadata_reader:
+            metadata = sanitize_strain_names(metadata, args.strip_prefixes)
+
             if database_ids_by_strain:
-                # Filter duplicates.
+                # Filter duplicates. This should only happen after all
+                # transformations to the strain column.
                 metadata = filter_duplicates(
                     metadata,
                     database_ids_by_strain,
                 )
 
-            # Reset the data frame index, to make the "strain" column available
-            # for transformation.
-            strain_field = metadata.index.name
-            metadata = metadata.reset_index()
-
             # Parse GISAID location field into separate fields for geographic
             # scales. Replace missing field values with "?".
             if args.parse_location_field and args.parse_location_field in metadata.columns:
-                locations = pd.DataFrame(
-                    (
-                        parse_location_string(location, LOCATION_FIELDS)
-                        for location in metadata[args.parse_location_field].values
-                    )
+                locations = pd.DataFrame.from_dict(
+                    {
+                        strain: parse_location_string(location, LOCATION_FIELDS)
+                        for strain, location in metadata[args.parse_location_field].items()
+                    }, orient='index'
                 )
+                locations.index.name = metadata.index.name
 
                 # Combine new location columns with original metadata and drop the
                 # original location column.
@@ -461,27 +497,19 @@ if __name__ == '__main__':
                     axis=1
                 ).drop(columns=[args.parse_location_field])
 
-            # Strip prefixes from strain names.
-            if args.strip_prefixes:
-                metadata[strain_field] = metadata[strain_field].apply(
-                    lambda strain: strip_prefixes(strain, args.strip_prefixes)
-                )
-
-            # Replace whitespaces from strain names with underscores to match GISAID's
-            # convention since whitespaces are not allowed in FASTA record names.
-            metadata[strain_field] = metadata[strain_field].str.replace(" ", "_")
-
             # Rename columns as needed, after transforming strain names. This
             # allows us to avoid keeping track of a new strain name field
             # provided by the user.
             if len(new_column_names) > 0:
                 metadata = metadata.rename(columns=new_column_names)
+                if metadata.index.name in new_column_names:
+                    metadata.index = metadata.index.rename(new_column_names[metadata.index.name])
 
             # Write filtered and transformed metadata to the output file.
             metadata.to_csv(
                 output_file_handle,
                 sep="\t",
-                index=False,
+                index=True,
                 header=emit_header,
             )
             emit_header = False

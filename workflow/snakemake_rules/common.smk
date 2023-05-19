@@ -208,6 +208,19 @@ def _get_max_date_for_frequencies(wildcards):
         )
 
 def _get_upload_inputs(wildcards):
+    # Do whatever the configuration says if it has opinions.
+    if "upload" in config:
+        return config["upload"]
+
+    # Otherwise, assume we're running under the nextstrain-gisaid or
+    # nextstrain-open profile.
+    #
+    # XXX TODO: We could replace the dynamic upload mapping generated below
+    # with a static mapping defined in each profile's config by expand()-ing
+    # (or str.format()-ing) {build_name} and {auspice_json_prefix} in the
+    # static keys and values.  Leaving this as a future improvement for now.
+    #   -trs, 1 Dec 2022
+
     # The main workflow supports multiple inputs/origins, but our desired file
     # structure under data.nextstrain.org/files/ncov/open/… is designed around
     # a single input/origin.  Intermediates (aligned, etc)
@@ -227,7 +240,7 @@ def _get_upload_inputs(wildcards):
     # for the nextstrain.org/ncov/gisaid and …/open builds and then
     # special-cases them below.
     regions = {"global", "africa", "asia", "europe", "north-america", "oceania", "south-america"}
-    timespans = {"2m", "6m", "all-time"}
+    timespans = {"1m", "2m", "6m", "all-time"}
     region_timespan_builds = [f"{region}_{timespan}" for region, timespan in product(regions, timespans)]
 
     # mapping of remote → local filenames
